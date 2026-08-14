@@ -1,5 +1,5 @@
 Package: pillarium
-Version: 0.1.0
+Version: 0.0.2
 Architecture: all
 Maintainer: Spacey32 on Github
 Depends: python3, python3-venv, python3-xlib, python3-cairosvg, python3-pil, picom, lightdm-gtk-greeter
