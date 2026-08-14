@@ -1,0 +1,36 @@
+{
+  "quick_launch": [
+    {
+      "cmd": [
+        "xterm"
+      ],
+      "label": "xterm",
+      "icon": "mini.xterm",
+      "desktop_file": "/usr/share/applications/debian-xterm.desktop",
+      "path": null
+    }
+  ],
+  "desktop_icons": [
+    {
+      "cmd": [
+        "/usr/bin/steam"
+      ],
+      "label": "Steam",
+      "icon": "steam",
+      "desktop_file": "/usr/share/applications/steam.desktop",
+      "path": null
+    },
+    {
+      "cmd": [
+        "xdg-open",
+        "/home/sushipie314/Desktop/yes"
+      ],
+      "label": "yes",
+      "icon": null,
+      "desktop_file": null,
+      "path": null
+    }
+  ],
+  "theme": "dark",
+  "taskbar_override_redirect": false
+}
