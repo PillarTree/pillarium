@@ -1,0 +1,15 @@
+chmod +x /usr/bin/pillarium_data/install.sh
+echo "Running post installation script for python..."
+sh -C /usr/bin/pillarium_data/install.sh
+echo "Running post-install script for lightDM..."
+echo "[Seat:*]
+greeter=lightdm-gtk-greeter
+user-session=pillarium" | sudo tee /etc/lightdm/lightdm.conf
+echo "[Desktop Entry]
+Name=Pillarium Window Manager
+Comment=A minimalist X11 window manager
+Exec=pillarium
+TryExec=python3
+Type=Application
+DesktopNames=pillarium" | sudo tee /usr/share/xsessions/pillarium.desktop
+sudo chmod +x /usr/bin/pillarium

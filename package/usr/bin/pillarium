@@ -1,0 +1,2 @@
+sudo picom -b --config /usr/bin/pillarium_data/picom.conf
+/usr/bin/pillarium_data/pillarium_x11.py

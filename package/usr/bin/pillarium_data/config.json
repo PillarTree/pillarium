@@ -1,0 +1,15 @@
+{
+  "quick_launch": [
+    {
+      "cmd": [
+        "xterm"
+      ],
+      "label": "xterm",
+      "icon": "mini.xterm",
+      "desktop_file": "/usr/share/applications/debian-xterm.desktop",
+      "path": null
+    }
+  ],
+  "theme": "dark",
+  "taskbar_override_redirect": false
+}

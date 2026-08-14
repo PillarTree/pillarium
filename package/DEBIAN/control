@@ -1,0 +1,9 @@
+Package: pillarium
+Version: 0.0.1
+Architecture: all
+Maintainer: Spacey32 on Github
+Depends: python3, python3-venv, python3-xlib, python3-cairosvg, python3-pil, picom, lightdm-gtk-greeter
+Section: utils
+Priority: optional
+Description: A minimalistic window manager built in python3
+ A window manager built with the help of AI using XLib/Pure X11, featuring application menus, bluetooth support, and more
