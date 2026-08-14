@@ -19,7 +19,7 @@
       "icon": "steam",
       "desktop_file": "/usr/share/applications/steam.desktop",
       "path": null
-    },
+    }
   ],
   "theme": "dark",
   "taskbar_override_redirect": false
