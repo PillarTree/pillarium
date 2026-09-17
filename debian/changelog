@@ -1,3 +1,12 @@
+pillarium (1.0.9-1) unstable; urgency=low
+
+  * Capture diagnostics for hard-to-reproduce crashes: the session
+    launcher now appends stdout/stderr to $PILLARIUM_HOME/pillarium.log
+    and the entry point enables faulthandler plus a fatal traceback
+    dump, so the "crash when clicking off the alert dialog" leaves a
+    usable stack trace instead of vanishing into the rotated
+    ~/.xsession-errors.
+
 pillarium (1.0.8-1) unstable; urgency=low
 
   * Fix an unbounded memory leak and CPU spin in the _NET_WM_PING
@@ -6,15 +15,6 @@ pillarium (1.0.8-1) unstable; urgency=low
     were re-pinged forever.  Stale tokens are now dropped before each
     ping and windows already flagged unresponsive are skipped until the
     user chooses Wait/Force Quit.
-
-pillarium (1.0.8-1) unstable; urgency=low
-
-  * Fix an unbounded memory leak and CPU churn in the _NET_WM_PING
-    keepalive: every re-ping of an unresponsive window added a new entry
-    to the ping-token table that was never removed, and already-flagged
-    windows were re-pinged on every sweep forever.  Stale tokens are now
-    dropped before re-pinging and flagged windows are left alone until
-    they are cleared.
 
 pillarium (1.0.7-1) unstable; urgency=low
 

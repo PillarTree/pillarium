@@ -5,7 +5,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-VER="1.0.8"
+VER="1.0.9"
 REL="1"
 PKG="pillarium_${VER}-${REL}_all"
 STAGE="debian/${PKG}"
@@ -43,7 +43,7 @@ mkdir -p "$PILLARIUM_HOME"
 if command -v picom >/dev/null 2>&1; then
     picom -b --config /usr/share/pillarium/picom.conf >/dev/null 2>&1 &
 fi
-exec python3 /usr/share/pillarium/pillarium_x11.py
+exec python3 /usr/share/pillarium/pillarium_x11.py >>"$PILLARIUM_HOME/pillarium.log" 2>&1
 EOF
 chmod 755 "$STAGE/usr/bin/pillarium"
 
@@ -113,7 +113,7 @@ PYEOF
 
 # --- man page ------------------------------------------------------------
 cat > "$STAGE/usr/share/man/man1/pillarium.1" <<'EOF'
-.TH PILLARIUM 1 "September 2026" "Pillarium 1.0.8" "User Commands"
+.TH PILLARIUM 1 "September 2026" "Pillarium 1.0.9" "User Commands"
 .SH NAME
 pillarium \- lightweight X11 window manager / desktop environment
 .SH SYNOPSIS
@@ -145,7 +145,7 @@ gzip -9 -n -f "$STAGE/usr/share/man/man1/pillarium.1"
 
 # --- pillarium-notify man page -------------------------------------------
 cat > "$STAGE/usr/share/man/man1/pillarium-notify.1" <<'EOF'
-.TH PILLARIUM-NOTIFY 1 "September 2026" "Pillarium 1.0.8" "User Commands"
+.TH PILLARIUM-NOTIFY 1 "September 2026" "Pillarium 1.0.9" "User Commands"
 .SH NAME
 pillarium-notify \- raise an alert dialog in a running Pillarium session
 .SH SYNOPSIS
