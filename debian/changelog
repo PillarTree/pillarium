@@ -1,3 +1,11 @@
+pillarium (1.0.6-1) unstable; urgency=low
+
+  * Restore Image.tostring() compatibility: Pillow >= 10 removed it, but
+    legacy python-xlib still calls it inside put_pil_image, which crashed
+    every PIL-drawn surface (menus, alerts, launcher, desktop icons,
+    decorations) on stock installs. A one-line shim in the entry point
+    maps tostring() -> tobytes() when missing.
+
 pillarium (1.0.5-1) unstable; urgency=low
 
   * Harden theme colour allocation so the UI can never fall back to an
