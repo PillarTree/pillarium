@@ -201,6 +201,7 @@ class ThemeMixin:
         import os
         self.dark_mode = os.environ.get("PILLARIUM_LIGHT", "0") != "1"
         self.theme_mode = "light" if not self.dark_mode else "dark"
+        self._color_cache = {}
         self._apply_palette()
 
     def set_theme(self, dark_mode):
@@ -331,33 +332,40 @@ class ThemeMixin:
             pass
 
     def _alloc_color(self, color_name, fallback_pixel):
+        cached = self._color_cache.get(color_name)
+        if cached is not None:
+            return cached
         try:
             cmap = self.screen.default_colormap
-            return cmap.alloc_named_color(color_name).pixel
+            color_pixel = cmap.alloc_named_color(color_name).pixel
         except Exception:
-            return fallback_pixel
+            color_pixel = fallback_pixel
+        self._color_cache[color_name] = color_pixel
+        return color_pixel
 
     def _apply_palette(self):
+        if not hasattr(self, "_color_cache"):
+            self._color_cache = {}
         mode = getattr(self, "theme_mode", "light" if not self.dark_mode else "dark")
         pal = PALETTES.get(mode, PALETTE_DARK)
         self.current_palette = pal
         self.colors = {
             "border": self._alloc_color(pal["border"], self.screen.black_pixel),
             "titlebar": self._alloc_color(
-                pal.get("taskbar", pal["surface"]), self.screen.white_pixel
+                pal.get("taskbar", pal["surface"]), self.screen.black_pixel
             ),
             "titlebar_alt": self._alloc_color(
-                pal.get("taskbar_active", pal["titlebar_alt"]), self.screen.white_pixel
+                pal.get("taskbar_active", pal["titlebar_alt"]), self.screen.black_pixel
             ),
-            "surface": self._alloc_color(pal["surface"], self.screen.white_pixel),
-            "accent": self._alloc_color(pal["accent"], self.screen.white_pixel),
+            "surface": self._alloc_color(pal["surface"], self.screen.black_pixel),
+            "accent": self._alloc_color(pal["accent"], self.screen.black_pixel),
             "text": self._alloc_color(pal["text"], self.screen.white_pixel),
             "taskbar": self._alloc_color(
-                pal.get("taskbar", pal["surface"]), self.screen.white_pixel
+                pal.get("taskbar", pal["surface"]), self.screen.black_pixel
             ),
             "taskbar_active": self._alloc_color(
                 pal.get("taskbar_active", pal["titlebar_alt"]),
-                self.screen.white_pixel,
+                self.screen.black_pixel,
             ),
         }
 

@@ -1,3 +1,13 @@
+pillarium (1.0.5-1) unstable; urgency=low
+
+  * Harden theme colour allocation so the UI can never fall back to an
+    all-white look: palette pixels are cached (no repeated X colormap
+    allocations on theme switches, preventing colormap exhaustion on
+    low-depth displays), and when an allocation fails the surfaces now
+    fall back to black with white text instead of white-with-white.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Wed, 16 Sep 2026 00:00:00 +0000
+
 pillarium (1.0.4-1) unstable; urgency=low
 
   * Add the retro theme: a phosphor-green palette (PALETTE_RETRO)
