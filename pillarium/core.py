@@ -1183,10 +1183,26 @@ class CoreMixin:
         try:
             if event.client_type != self._atom("WM_PROTOCOLS"):
                 return
-            data = list(event.data) if event.data is not None else []
-            if len(data) < 2 or int(data[0]) != int(self._atom("_NET_WM_PING")):
+            raw = event.data
+            if raw is None:
                 return
-            token = int(data[1])
+            # python-xlib exposes ClientMessage.data as a (format, values)
+            # tuple (see rq.PropertyData.parse_binary_value), so unwrap it
+            # before reading the atom/token.  Treating the tuple itself as
+            # the value list meant data[0] was always the literal 32 and no
+            # ping reply ever matched.
+            if (
+                isinstance(raw, (tuple, list))
+                and len(raw) == 2
+                and isinstance(raw[0], int)
+            ):
+                values = raw[1]
+            else:
+                values = raw
+            values = list(values)
+            if len(values) < 2 or int(values[0]) != int(self._atom("_NET_WM_PING")):
+                return
+            token = int(values[1])
         except Exception:
             return
         client_id = self._ping_tokens.pop(token, None)

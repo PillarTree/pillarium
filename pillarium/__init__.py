@@ -17,5 +17,5 @@ except Exception:
 
 from .wm import Pillarium
 
-__version__ = "1.0.6"
+__version__ = "1.0.10"
 __all__ = ["Pillarium"]

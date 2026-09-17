@@ -1,3 +1,13 @@
+pillarium (1.0.10-1) unstable; urgency=low
+
+  * Fix the _NET_WM_PING reply parser, which discarded every reply:
+    python-xlib delivers ClientMessage.data as a (format, values) tuple,
+    but the code treated that tuple itself as the value list, so data[0]
+    was always the literal 32 and never matched the _NET_WM_PING atom.
+    The result was that no client was ever seen to answer a ping and
+    every managed window was falsely reported as "not responding" after
+    6 seconds.  Unwrap the tuple before comparing the atom and token.
+
 pillarium (1.0.9-1) unstable; urgency=low
 
   * Capture diagnostics for hard-to-reproduce crashes: the session
