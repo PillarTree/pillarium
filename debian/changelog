@@ -1,3 +1,21 @@
+pillarium (1.0.8-1) unstable; urgency=low
+
+  * Fix an unbounded memory leak and CPU spin in the _NET_WM_PING
+    watchdog: every re-ping of a stalled window added a new entry to
+    _ping_tokens that was never removed, and already-reported windows
+    were re-pinged forever.  Stale tokens are now dropped before each
+    ping and windows already flagged unresponsive are skipped until the
+    user chooses Wait/Force Quit.
+
+pillarium (1.0.8-1) unstable; urgency=low
+
+  * Fix an unbounded memory leak and CPU churn in the _NET_WM_PING
+    keepalive: every re-ping of an unresponsive window added a new entry
+    to the ping-token table that was never removed, and already-flagged
+    windows were re-pinged on every sweep forever.  Stale tokens are now
+    dropped before re-pinging and flagged windows are left alone until
+    they are cleared.
+
 pillarium (1.0.7-1) unstable; urgency=low
 
   * Stop the taskbar self-check from reconfiguring, raising and remapping

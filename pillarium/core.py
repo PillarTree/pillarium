@@ -1136,6 +1136,9 @@ class CoreMixin:
         if not data:
             return
         client = data["client"]
+        for old_token, cid in list(self._ping_tokens.items()):
+            if cid == client_id:
+                self._ping_tokens.pop(old_token, None)
         self._ping_token_seq = (self._ping_token_seq + 1) % 0x7FFFFFFF
         token = self._ping_token_seq or 1
         self._ping_tokens[token] = client_id
@@ -1164,12 +1167,11 @@ class CoreMixin:
             if self.frames[client_id].get("minimized"):
                 continue
             outstanding = self._ping_outstanding.get(client_id)
+            if client_id in self._unresponsive:
+                continue
             if outstanding:
                 _token, sent = outstanding
-                if (
-                    now - sent > self.PING_TIMEOUT
-                    and client_id not in self._unresponsive
-                ):
+                if now - sent > self.PING_TIMEOUT:
                     self._unresponsive.add(client_id)
                     self._alert_unresponsive(client_id)
                 elif now - sent > self.PING_TIMEOUT * 2:
