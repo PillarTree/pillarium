@@ -1,0 +1,4 @@
+pillow>=9.0.0
+cairosvg
+python-xlib
+dbus-python

@@ -1,0 +1,106 @@
+pillarium (1.0.4-1) unstable; urgency=low
+
+  * Add the retro theme: a phosphor-green palette (PALETTE_RETRO)
+    selectable with theme=retro in config.json in addition to dark/light.
+    The dark/light shortcut (Alt+Shift+D) now cycles dark -> light -> retro
+    -> dark, and config.json reloads pick the new mode up live.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Wed, 16 Sep 2026 00:00:00 +0000
+
+pillarium (1.0.3-1) unstable; urgency=low
+
+  * Add modal alert dialogs for three levels: startup (shown when
+    Pillarium launches), warning and error.  Dialogs are centred,
+    themed, keyboard driven (Esc dismisses, Enter/Space actuates the
+    default button) and stack in a queue.
+  * Add unresponsive-application detection via the _NET_WM_PING
+    protocol; a window that stops replying raises an error alert
+    offering Wait or Force Quit.
+  * Route critical D-Bus notifications (urgency >= 2) to error alerts,
+    leaving normal/low notifications on the existing toast.
+  * Add the pillarium-notify(1) command so scripts and applications can
+    raise an alert over a local UNIX socket.
+  * Ship Ogg Vorbis alert chimes (startup/warn/error) under the package
+    and play them through the first available PipeWire/PulseAudio/
+    ffmpeg/mpv/vorbis-tools/SoX player, falling back to the terminal
+    bell.  Sound, volume and per-level enablement are configurable in
+    the new "alerts" section of config.json.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Wed, 16 Sep 2026 00:00:00 +0000
+
+pillarium (1.0.2-1) unstable; urgency=low
+
+  * Add Ethernet (wired) support: a taskbar indicator that reflects the
+    nmcli device state, and an Alt+Shift+E menu to connect/disconnect
+    wired devices.
+  * Add Alt+Tab / Alt+Shift+Tab window cycling between managed windows.
+  * Add a live light/dark theme toggle (Alt+Shift+D) that repaints every
+    frame, decoration, the taskbar, desktop icons and any open popup.
+  * Reload config.json automatically when it changes on disk, so external
+    editors (e.g. Planet Control Center) apply settings without a restart.
+  * Clean shutdown: terminate the wallpaper/compositor helpers, close
+    menus, the search bar, dialogs and notifications, destroy managed
+    windows and the taskbar, and handle SIGTERM/SIGINT/SIGHUP.
+  * Fix importing the package without dbus-python/gi installed: the
+    D-Bus notification service is now defined only when D-Bus is
+    available, and notifications are skipped gracefully otherwise.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Wed, 16 Sep 2026 00:00:00 +0000
+
+pillarium (1.0.1-3) unstable; urgency=low
+
+  * Fix icon lookup for names containing dots (e.g. mini.xterm).
+  * Use xrender picom backend (works without GLX).
+  * Ship a clean default config.json (drop dev artifacts).
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Wed, 19 Aug 2026 00:00:00 +0000
+
+pillarium (1.0.0-6) unstable; urgency=low
+
+  * Add freedesktop.org notification daemon via D-Bus (org.freedesktop.Notifications).
+  * Notifications display as styled popups above the taskbar with auto-dismiss.
+  * Add live time/date format cycling on the taskbar clock.
+  * Middle-click clock to cycle formats; right-click for format menu with preview.
+  * Time formats: 24h, 12h, with/without seconds, with timezone.
+  * Date formats: MM/DD, DD/MM, ISO, Mon DD, Day Mon DD.
+  * Formats persist to ~/.pillarium/config.json instantly.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Mon, 17 Aug 2026 18:04:30 +0000
+
+pillarium (1.0.0-3) unstable; urgency=low
+
+  * Fix clicking on objects inside windows: the passive button grabs on
+    managed clients used owner_events=True with an async pointer grab,
+    so XAllowEvents(ReplayPointer) was a no-op and every press on a
+    client window was swallowed by the window manager. The grabs now
+    use owner_events=False with GrabModeSync (freezing the pointer at
+    the press) and the button handler replays the press, so the
+    application receives the click exactly as if the window manager
+    had never intercepted it (click-to-focus without breaking clicks).
+  * Add a replay safety net for presses that arrive while a client is
+    being torn down, so the pointer is never left frozen.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Sat, 15 Aug 2026 22:00:00 +0000
+
+pillarium (1.0.0-2) unstable; urgency=low
+
+  * Fix minimise: hidden windows are kept alive (unmapped) instead of
+    being destroyed, focus is released, and they can be restored from
+    the taskbar.
+  * Fix click-to-focus: clicks on a window's client area now activate
+    the window via passive button grabs, replaying the click to the
+    application so it still receives it.
+  * Remove the subwindow event-mask rewriting that broke client event
+    delivery (BadAccess on application-owned subwindows).
+  * Clicking empty desktop space now drops keyboard focus.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Sat, 15 Aug 2026 17:00:00 +0000
+
+pillarium (1.0.0-1) unstable; urgency=low
+
+  * First release using the Cadet packaging system.
+  * Ship the 'pillarium' Python package in dist-packages, a /usr/bin
+    launcher, compositor config, wallpaper and lightdm session drop-in.
+  * Runtime data is copied to ~/.pillarium on first launch.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Sat, 15 Aug 2026 17:00:00 +0000
