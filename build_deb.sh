@@ -5,7 +5,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-VER="1.0.6"
+VER="1.0.7"
 REL="1"
 PKG="pillarium_${VER}-${REL}_all"
 STAGE="debian/${PKG}"
@@ -113,7 +113,7 @@ PYEOF
 
 # --- man page ------------------------------------------------------------
 cat > "$STAGE/usr/share/man/man1/pillarium.1" <<'EOF'
-.TH PILLARIUM 1 "September 2026" "Pillarium 1.0.6" "User Commands"
+.TH PILLARIUM 1 "September 2026" "Pillarium 1.0.7" "User Commands"
 .SH NAME
 pillarium \- lightweight X11 window manager / desktop environment
 .SH SYNOPSIS
@@ -145,7 +145,7 @@ gzip -9 -n -f "$STAGE/usr/share/man/man1/pillarium.1"
 
 # --- pillarium-notify man page -------------------------------------------
 cat > "$STAGE/usr/share/man/man1/pillarium-notify.1" <<'EOF'
-.TH PILLARIUM-NOTIFY 1 "September 2026" "Pillarium 1.0.6" "User Commands"
+.TH PILLARIUM-NOTIFY 1 "September 2026" "Pillarium 1.0.7" "User Commands"
 .SH NAME
 pillarium-notify \- raise an alert dialog in a running Pillarium session
 .SH SYNOPSIS

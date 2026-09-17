@@ -1,3 +1,11 @@
+pillarium (1.0.7-1) unstable; urgency=low
+
+  * Stop the taskbar self-check from reconfiguring, raising and remapping
+    the taskbar every second (and logging three lines each time).  It now
+    only recreates the taskbar when its geometry is genuinely wrong, which
+    removes the constant X churn that made Pillarium look unresponsive to
+    the session compositor and flooded ~/.xsession-errors.
+
 pillarium (1.0.6-1) unstable; urgency=low
 
   * Restore Image.tostring() compatibility: Pillow >= 10 removed it, but

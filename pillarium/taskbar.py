@@ -99,7 +99,6 @@ class TaskbarMixin:
                 except Exception:
                     pass
                 self.taskbar = self._create_taskbar()
-                return
         except Exception as exc:
             print(f"Pillarium: taskbar.get_geometry failed: {exc}", file=sys.stderr)
             try:
@@ -107,42 +106,6 @@ class TaskbarMixin:
             except Exception:
                 pass
             self.taskbar = self._create_taskbar()
-            return
-        try:
-            tb.configure(
-                x=0,
-                y=self.screen_h - self.TASKBAR_H,
-                width=self.screen_w,
-                height=self.TASKBAR_H,
-                stack_mode=X.Above,
-            )
-            print("Pillarium: taskbar reconfigured for verify", file=sys.stderr)
-        except Exception as exc:
-            print(
-                f"Pillarium: taskbar configure during verify failed: {exc}",
-                file=sys.stderr,
-            )
-        try:
-            if hasattr(tb, "raise_window"):
-                tb.raise_window()
-                print(
-                    "Pillarium: taskbar raise_window during verify succeeded",
-                    file=sys.stderr,
-                )
-        except Exception as exc:
-            print(
-                f"Pillarium: taskbar raise_window during verify failed: {exc}",
-                file=sys.stderr,
-            )
-        try:
-            tb.map()
-            print("Pillarium: taskbar mapped during verify", file=sys.stderr)
-        except Exception as exc:
-            print(
-                f"Pillarium: taskbar map during verify failed: {exc}",
-                file=sys.stderr,
-            )
-        self._ensure_taskbar_on_top()
 
     # -----------------------------------------------------------------
     # Determine what kind of item is under a task‑bar x‑coordinate
