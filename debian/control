@@ -8,13 +8,22 @@ Rules-Requires-Root: no
 
 Package: pillarium
 Architecture: all
-Depends: python3 (>= 3.9), python3-xlib, python3-pil, python3-cairosvg,
-         picom, lightdm-gtk-greeter
+Depends: python3 (>= 3.9), python3-xlib, python3-pil, python3-pil.imagetk,
+         python3-cairosvg, python3-packaging, picom, lightdm-gtk-greeter
 Recommends: python3-dbus, pipewire-bin | pulseaudio-utils, vorbis-tools
 Description: lightweight X11 window manager / desktop environment
  A minimalistic window manager written in pure Python on top of
- python-xlib. Features application menus, bluetooth support, desktop
- icons, wallpaper, and a taskbar.
+ python-xlib, with a customtkinter user interface. Features application
+ menus, bluetooth support, desktop icons, wallpaper, per-monitor taskbars
+ and virtual desktops.
+ .
+ The customtkinter user interface toolkit is bundled with the package,
+ so Pillarium installs on distributions that do not carry it.
+ .
+ Themes are token based: the Dark, Light and Retro palettes ship with
+ Pillarium, users can author their own in ~/.pillarium/themes and the
+ colours of the running desktop can be imported through the
+ freedesktop.org settings portal.
  .
  Modal alert dialogs report startup, warning and error events, with
  optional chimes; unresponsive applications and critical D-Bus

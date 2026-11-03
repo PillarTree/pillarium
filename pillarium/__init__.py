@@ -1,21 +1,22 @@
-"""Pillarium – a lightweight X11 window manager / desktop environment.
+"""Pillarium 2.0 - a lightweight X11 window manager and desktop shell.
 
-The project may live under any directory name; all data-file locations
-are resolved by :mod:`pillarium.paths` and can be overridden with
-environment variables (see that module for details).
+The package is organised in four layers:
+
+``pillarium.core``
+    The X11 layer: display handling, monitor enumeration, window
+    management, hotkeys and the ``_NET_WM_PING`` watchdog.
+``pillarium.shell``
+    The user interface, built with customtkinter: the desktop surface,
+    per-monitor taskbars, window decorations, panels and dialogs.
+``pillarium.system``
+    Everything that talks to the operating system: applications, audio,
+    networking, bluetooth, battery, processes and wallpapers.
+``pillarium.theme``
+    The theme engine: built-in palettes, user themes and the
+    freedesktop.org appearance import.
 """
 
-try:
-    from PIL import Image as _PILImage
+from __future__ import annotations
 
-    if not hasattr(_PILImage.Image, "tostring"):
-        # Pillow >= 10 removed Image.tostring(); legacy Xlib builds still
-        # call it in put_pil_image, so restore it for compatibility.
-        _PILImage.Image.tostring = _PILImage.Image.tobytes
-except Exception:
-    pass
-
-from .wm import Pillarium
-
-__version__ = "1.0.10"
-__all__ = ["Pillarium"]
+__version__ = "2.0.0"
+__all__ = ["__version__"]

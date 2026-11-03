@@ -1,4 +1,6 @@
+# Pillarium 2.0 runtime requirements.
 pillow>=9.0.0
 cairosvg
 python-xlib
 dbus-python
+customtkinter>=5.2.0

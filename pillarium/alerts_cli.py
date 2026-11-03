@@ -1,105 +1,96 @@
-"""``pillarium-notify`` - raise a Pillarium alert window from a script.
+"""Command line front end for the Pillarium alert system.
 
-Sends a small JSON message to the running window manager over the
-``pillarium-alerts.sock`` UNIX socket.  Examples::
+Usage::
 
-    pillarium-notify --error "Backup failed" "rsync exited with code 23"
-    pillarium-notify --warning --title "Low disk" "Only 4% free on /home"
-    pillarium-notify --startup "Session ready"
+    pillarium-notify --warning -t "Disk full" "/home is 90% full"
 
-If the window manager is not running the command exits non-zero with a
-message on stderr.
+The command talks to the running session over the UNIX socket created
+by :mod:`pillarium.alerts_server`.
 """
+
+from __future__ import annotations
 
 import argparse
 import json
-import os
 import socket
 import sys
 
 from . import paths
 
 
-def _build_parser():
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="pillarium-notify",
-        description="Raise a Pillarium alert window.",
-    )
-    level = parser.add_mutually_exclusive_group()
-    level.add_argument(
-        "--error", dest="level", action="store_const", const="error",
-        help="show an error alert (red)",
-    )
-    level.add_argument(
-        "--warning", "--warn", dest="level", action="store_const",
-        const="warning", help="show a warning alert (amber)",
-    )
-    level.add_argument(
-        "--startup", "--info", dest="level", action="store_const",
-        const="startup", help="show a startup/info alert (accent)",
-    )
-    parser.set_defaults(level="warning")
-    parser.add_argument("-t", "--title", default="", help="alert title")
-    parser.add_argument(
-        "-a", "--app", default="", help="application name shown in the dialog"
+        description="Raise an alert dialog in a running Pillarium session.",
     )
     parser.add_argument(
-        "-d", "--detail", default="", help="extra detail line"
+        "message",
+        nargs="?",
+        default="",
+        help="the message shown in the dialog",
     )
+    parser.add_argument("--error", action="store_true", help="show an error alert")
+    parser.add_argument("--warning", action="store_true", help="show a warning alert")
+    parser.add_argument("--startup", action="store_true", help="show a startup alert")
+    parser.add_argument("-t", "--title", default="Pillarium", help="dialog title")
+    parser.add_argument("-a", "--app", default="", help="application raising the alert")
+    parser.add_argument("-d", "--detail", default="", help="extra detail line")
     parser.add_argument(
-        "--timeout", type=float, default=None,
-        help="auto-dismiss after N seconds (0 = wait for the user)",
+        "--timeout",
+        type=float,
+        default=None,
+        help="auto dismiss after this many seconds (0 keeps it open)",
     )
-    parser.add_argument(
-        "--sound", dest="sound", action="store_true", default=None,
-        help="force the alert chime on",
-    )
-    parser.add_argument(
-        "--no-sound", dest="sound", action="store_false",
-        help="suppress the alert chime",
-    )
-    parser.add_argument(
-        "message", nargs="*", help="alert message (joined with spaces)"
-    )
+    parser.add_argument("--sound", dest="sound", action="store_true", default=True)
+    parser.add_argument("--no-sound", dest="sound", action="store_false")
     return parser
 
 
-def main(argv=None):
-    args = _build_parser().parse_args(argv)
-    message = " ".join(args.message)
-    if not args.title and not message:
-        print("pillarium-notify: nothing to show", file=sys.stderr)
-        return 2
+def main(argv: list[str] | None = None) -> int:
+    """Send an alert to the running Pillarium session."""
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    level = "warning"
+    if args.error:
+        level = "error"
+    elif args.startup:
+        level = "startup"
 
     payload = {
-        "level": args.level,
-        "title": args.title or message[:48],
-        "message": message,
+        "level": level,
+        "title": args.title,
+        "message": args.message,
         "app": args.app,
         "detail": args.detail,
         "timeout": args.timeout,
-        "sound": args.sound,
+        "sound": bool(args.sound),
     }
 
-    path = os.path.join(paths.home_dir(), "pillarium-alerts.sock")
-    if not os.path.exists(path):
+    path = paths.alert_socket_path()
+    if not _socket_exists(path):
         print(
-            "pillarium-notify: Pillarium is not running "
-            f"(no socket at {path})",
+            f"pillarium-notify: no Pillarium session is listening on {path}",
             file=sys.stderr,
         )
         return 1
 
     try:
-        conn = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        conn.settimeout(2.0)
-        conn.connect(path)
-        conn.sendall(json.dumps(payload).encode("utf-8") + b"\n")
-        conn.close()
-    except Exception as exc:
+        client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        client.settimeout(3.0)
+        client.connect(path)
+        client.sendall((json.dumps(payload) + "\n").encode("utf-8"))
+        client.close()
+    except OSError as exc:
         print(f"pillarium-notify: could not reach Pillarium: {exc}", file=sys.stderr)
         return 1
     return 0
+
+
+def _socket_exists(path: str) -> bool:
+    import os
+
+    return os.path.exists(path)
 
 
 if __name__ == "__main__":

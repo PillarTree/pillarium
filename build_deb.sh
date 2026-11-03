@@ -5,8 +5,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-VER="1.0.10"
-REL="1"
+VER="2.0.0"
+REL="3"
 PKG="pillarium_${VER}-${REL}_all"
 STAGE="debian/${PKG}"
 OUT="pillarium_${VER}-${REL}.deb"
@@ -28,6 +28,25 @@ mkdir -p "$STAGE/etc/lightdm/lightdm.conf.d"
 cp -r pillarium "$STAGE/usr/lib/python3/dist-packages/pillarium"
 find "$STAGE/usr/lib/python3/dist-packages/pillarium" -name '__pycache__' \
     -type d -exec rm -rf {} + 2>/dev/null || true
+find "$STAGE/usr/lib/python3/dist-packages/pillarium" -name '*.pyc' -delete 2>/dev/null || true
+
+# --- vendored user interface toolkit --------------------------------------
+# customtkinter is not in every distribution archive (it was dropped from
+# Debian and Ubuntu), so Pillarium ships it.  A version installed with
+# pip still takes precedence, because user site directories come first
+# on the Python path.
+if [ -d vendor ]; then
+    cp -r vendor/customtkinter "$STAGE/usr/lib/python3/dist-packages/customtkinter"
+    cp -r vendor/darkdetect "$STAGE/usr/lib/python3/dist-packages/darkdetect"
+    mkdir -p "$STAGE/usr/share/doc/pillarium/vendor"
+    cp vendor/LICENSE.* "$STAGE/usr/share/doc/pillarium/vendor/" 2>/dev/null || true
+    cp vendor/README.md "$STAGE/usr/share/doc/pillarium/vendor/README" 2>/dev/null || true
+    find "$STAGE/usr/lib/python3/dist-packages/customtkinter" -name '__pycache__' \
+        -type d -exec rm -rf {} + 2>/dev/null || true
+    find "$STAGE/usr/lib/python3/dist-packages/darkdetect" -name '__pycache__' \
+        -type d -exec rm -rf {} + 2>/dev/null || true
+    find "$STAGE/usr/lib/python3/dist-packages" -name '.DS_Store' -delete 2>/dev/null || true
+fi
 
 # --- launcher ------------------------------------------------------------
 cat > "$STAGE/usr/bin/pillarium" <<'EOF'
@@ -43,7 +62,7 @@ mkdir -p "$PILLARIUM_HOME"
 if command -v picom >/dev/null 2>&1; then
     picom -b --config /usr/share/pillarium/picom.conf >/dev/null 2>&1 &
 fi
-exec python3 /usr/share/pillarium/pillarium_x11.py >>"$PILLARIUM_HOME/pillarium.log" 2>&1
+exec /usr/bin/python3 -m pillarium >>"$PILLARIUM_HOME/pillarium.log" 2>&1
 EOF
 chmod 755 "$STAGE/usr/bin/pillarium"
 
@@ -52,13 +71,12 @@ cat > "$STAGE/usr/bin/pillarium-notify" <<'EOF'
 #!/bin/sh
 # Raise a Pillarium alert dialog from scripts, apps or the command line.
 # Usage: pillarium-notify [--error|--warning|--startup] [-t TITLE] MESSAGE
-exec python3 -m pillarium.alerts_cli "$@"
+exec /usr/bin/python3 -m pillarium.alerts_cli "$@"
 EOF
 chmod 755 "$STAGE/usr/bin/pillarium-notify"
 
 # --- runtime data --------------------------------------------------------
-cp pillarium_x11.py "$STAGE/usr/share/pillarium/pillarium_x11.py"
-cp config.json "$STAGE/usr/share/pillarium/config.json"
+cp pillarium/defaults/config.json "$STAGE/usr/share/pillarium/config.json"
 cp pillarium_wallpaper.png "$STAGE/usr/share/pillarium/pillarium_wallpaper.png"
 cp picom-conf.conf "$STAGE/usr/share/pillarium/picom.conf"
 
@@ -113,7 +131,7 @@ PYEOF
 
 # --- man page ------------------------------------------------------------
 cat > "$STAGE/usr/share/man/man1/pillarium.1" <<'EOF'
-.TH PILLARIUM 1 "September 2026" "Pillarium 1.0.10" "User Commands"
+.TH PILLARIUM 1 "October 2026" "Pillarium 2.0.0" "User Commands"
 .SH NAME
 pillarium \- lightweight X11 window manager / desktop environment
 .SH SYNOPSIS
@@ -121,14 +139,27 @@ pillarium \- lightweight X11 window manager / desktop environment
 .SH DESCRIPTION
 .B pillarium
 is a minimalistic window manager written in pure Python on top of
-python\-xlib. It provides an application menu, desktop icons, wallpaper,
-a taskbar and window decorations.
+python\-xlib, with a customtkinter user interface.  It provides
+application menus, desktop icons, wallpaper, per\-monitor taskbars,
+virtual desktops, a themeable desktop and window decorations.
 .SH ENVIRONMENT
 .TP
 .B PILLARIUM_HOME
-Directory holding config.json and the wallpaper.  Defaults to
+Directory holding config.json, the themes and the log.  Defaults to
 .I ~/.pillarium
 when unset.
+.TP
+.B PILLARIUM_CONFIG
+Absolute path of the configuration file.
+.TP
+.B PILLARIUM_THEMES
+Directory holding user authored theme files.
+.TP
+.B PILLARIUM_WALLPAPER
+Absolute path of the default wallpaper image.
+.TP
+.B PILLARIUM_DESKTOP
+Desktop folder scanned for icons.
 .SH FILES
 .TP
 .I /usr/share/xsessions/pillarium.desktop
@@ -145,7 +176,7 @@ gzip -9 -n -f "$STAGE/usr/share/man/man1/pillarium.1"
 
 # --- pillarium-notify man page -------------------------------------------
 cat > "$STAGE/usr/share/man/man1/pillarium-notify.1" <<'EOF'
-.TH PILLARIUM-NOTIFY 1 "September 2026" "Pillarium 1.0.10" "User Commands"
+.TH PILLARIUM-NOTIFY 1 "October 2026" "Pillarium 2.0.0" "User Commands"
 .SH NAME
 pillarium-notify \- raise an alert dialog in a running Pillarium session
 .SH SYNOPSIS
@@ -206,32 +237,8 @@ EOF
 gzip -9 -n -f "$STAGE/usr/share/man/man1/pillarium-notify.1"
 
 # --- docs ----------------------------------------------------------------
-cat > "$STAGE/usr/share/doc/pillarium/README" <<'EOF'
-Pillarium - a lightweight X11 window manager / desktop environment
-=================================================================
-
-Written in pure Python on top of python-xlib.  Features application
-menus, bluetooth support, desktop icons, wallpaper and a taskbar.
-
-Launch with:  pillarium
-
-Pillarium shows modal alert dialogs for startup, warning and error
-events.  Unresponsive applications (missing _NET_WM_PING replies) and
-critical D-Bus notifications raise error alerts; scripts and other
-programs can raise alerts with:
-
-    pillarium-notify --warning -t "Disk full" "/home is 100% full"
-
-Each alert plays a chime from /usr/lib/python3/dist-packages/pillarium/
-sounds (Ogg Vorbis).  Sound and volume can be tuned in the "alerts"
-section of config.json.
-
-The first launch copies /usr/share/pillarium/{config.json,
-pillarium_wallpaper.png} into ~/.pillarium for easy user tweaking.
-
-Runtime paths can be overridden with PILLARIUM_HOME, PILLARIUM_CONFIG
-and PILLARIUM_WALLPAPER (see the pillarium.paths module).
-EOF
+cp README.md "$STAGE/usr/share/doc/pillarium/README"
+gzip -9 -n -f "$STAGE/usr/share/doc/pillarium/README"
 cp debian/copyright "$STAGE/usr/share/doc/pillarium/copyright"
 cp debian/changelog "$STAGE/usr/share/doc/pillarium/changelog.Debian"
 gzip -9 -n -f "$STAGE/usr/share/doc/pillarium/changelog.Debian"
@@ -251,12 +258,22 @@ Priority: optional
 Architecture: all
 Maintainer: Pillarium Developers <pillarium@users.noreply.github.com>
 Installed-Size: ${INSTALLED}
-Depends: python3 (>= 3.9), python3-xlib, python3-pil, python3-cairosvg, picom, lightdm-gtk-greeter
+Depends: python3 (>= 3.9), python3-xlib, python3-pil, python3-pil.imagetk,
+         python3-cairosvg, python3-packaging, picom, lightdm-gtk-greeter
 Recommends: python3-dbus, pipewire-bin | pulseaudio-utils, vorbis-tools
 Description: lightweight X11 window manager / desktop environment
  A minimalistic window manager written in pure Python on top of
- python-xlib. Features application menus, bluetooth support, desktop
- icons, wallpaper, and a taskbar.
+ python-xlib, with a customtkinter user interface.  Features application
+ menus, bluetooth support, desktop icons, wallpaper, per-monitor taskbars
+ and virtual desktops.
+ .
+ The customtkinter user interface toolkit is bundled with the package,
+ so Pillarium installs on distributions that do not carry it.
+ .
+ Themes are token based: the Dark, Light and Retro palettes ship with
+ Pillarium, users can author their own in ~/.pillarium/themes and the
+ colours of the running desktop can be imported through the
+ freedesktop.org settings portal.
  .
  Modal alert dialogs report startup, warning and error events, with
  optional chimes; unresponsive applications and critical D-Bus

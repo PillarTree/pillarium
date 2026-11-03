@@ -1,3 +1,82 @@
+pillarium (2.0.0-3) unstable; urgency=low
+
+  * Keep the keyboard focus on the window the user is working in.
+    Moving the pointer over another window no longer moves the focus:
+    the X focus is never left on the pointer, which is what made the
+    X server hand the keyboard to whatever the mouse was over.  The
+    focus also survives the destruction of a window frame, which used
+    to drop the focus on the pointer for good.
+
+  * Add a "Move the focus with the mouse" switch in the settings, for
+    the people who want the classic behaviour.
+
+  * Fix the pointer position lookup.  It always failed and reported
+    the centre of the screen, so new windows never opened on the
+    monitor the pointer was on.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Tue, 20 Oct 2026 23:10:00 +0000
+
+pillarium (2.0.0-2) unstable; urgency=low
+
+  * Fix a crash when a window was closed.  Xlib's default error handler
+    prints a message and calls exit(1), so a single X protocol error -
+    for example a message that raced with an application destroying
+    its own window - took the whole session down.  Pillarium now
+    installs an error handler that ignores X errors instead, for the
+    toolkit's connection as well as for its own.
+
+  * Closing a window no longer asks the server to remap it, which
+    made the window manager adopt the closing window again.
+
+  * The window manager no longer sends close or ping messages to
+    windows that have already been destroyed.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Tue, 20 Oct 2026 22:30:00 +0000
+
+pillarium (2.0.0-1) unstable; urgency=low
+
+  * Complete rewrite of the code base.  The user interface is now built
+    with customtkinter: the desktop, the taskbars, the window
+    decorations, the launcher, the panels and the dialogs are real
+    widgets instead of hand drawn X11 surfaces.  The window manager
+    itself still talks to the X server through python-xlib and keeps
+    managing foreign application windows, which are reparented into
+    the customtkinter frames.
+
+  * New theme engine.  Colours are tokens instead of constants, three
+    built-in palettes (Dark, Light, Retro) ship with Pillarium and
+    user themes are plain JSON files in $PILLARIUM_HOME/themes.  A
+    theme editor lets every token be picked, previewed and saved.
+
+  * Import the colour scheme and accent colour of the running desktop
+    through the freedesktop.org Settings portal
+    (org.freedesktop.portal.Settings, org.freedesktop.appearance
+    namespace), with GNOME and KDE fallbacks.
+
+  * Virtual desktops: up to twelve workspaces, each with its own set
+    of windows, a switcher in the taskbar and Ctrl+Alt+Left/Right
+    shortcuts.  Windows can be moved between desktops from the window
+    menu.
+
+  * Multi-monitor support: a taskbar per monitor, new windows open on
+    the monitor under the pointer, windows can be moved between
+    monitors and the layout follows RandR hotplug events.
+
+  * New settings window with sections for the appearance, the virtual
+    desktops, the wallpaper, the taskbar and the pinned applications.
+
+  * Application launcher with fuzzy search over every installed
+    application, the desktop folder and the pinned quick launch
+    entries.
+
+  * Windows are closed politely through WM_DELETE_WINDOW and are only
+    killed when the application refuses to go away.
+
+  * Modal alerts, desktop notifications over D-Bus and the
+    pillarium-notify command line tool are unchanged.
+
+ -- Pillarium Developers <pillarium@users.noreply.github.com>  Tue, 20 Oct 2026 00:00:00 +0000
+
 pillarium (1.0.10-1) unstable; urgency=low
 
   * Fix the _NET_WM_PING reply parser, which discarded every reply:
